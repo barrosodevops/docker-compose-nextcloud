@@ -1,0 +1,61 @@
+#mkdir /compose
+#cd compose
+#mkdir cloud
+#cd cloud
+#nano docker-compose.yml
+
+//adicionar o seguinte código no arquivo docker-compose.yml
+//
+//
+
+services:
+  nc:
+    image: nextcloud:apache
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - nc_data:/var/www/html
+    networks:
+      - redisnet
+      - dbnet
+    environment:
+      - REDIS_HOST=redis
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=nextcloud
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - redisnet
+    expose:
+      - 6379
+  db:
+    image: mariadb:10.5
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - dbnet
+    environment:
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_ROOT_PASSWORD=nextcloud
+      - MYSQL_PASSWORD=nextcloud
+    expose:
+      - 3306
+volumes:
+  db_data:
+  nc_data:
+networks:
+  dbnet:
+  redisnet:
+ 
+
+//executar os seguintes comandos no terminal do linux
+#docker-compose up -d
+#docker ps
+//acessar o IP da aplicação docker e configurar o nextcloud
